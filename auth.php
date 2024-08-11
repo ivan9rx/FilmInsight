@@ -26,7 +26,7 @@ require_once("templates/header.php");
             </div>
             <div class="col md-4" id="login-container">
                 <h2>Criar conta</h2>
-                <form action="" method="POST" class="row">
+                <form action="<?php echo $BASE_URL; ?>auth_process.php" method="POST" class="row">
                     <input type="hidden" name="type" value="register">
                     <div class="form-group">
                         <label for="email">Email</label>
