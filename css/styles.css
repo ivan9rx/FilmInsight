@@ -87,6 +87,21 @@
     border-color: #f5c518;
 }
 
+/*edite profile*/
+#profile-image-container {
+    width: 150px;
+    height: 150px; /* Adicionado para garantir que a imagem de fundo seja exibida */
+    border: 6px solid #f5c518;
+    border-radius: 100%; /* Alterado para 50% para garantir a forma circular */
+    background-size: cover;
+    background-position: center;
+    margin: 25px auto;
+}
+
+#change-password-container {
+    margin-top: 30px;
+}
+
 #main-container {
     background-color: #000;
     color: #fff;
