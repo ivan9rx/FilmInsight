@@ -10,6 +10,8 @@ require_once("dao/UserDAO.php");
 
 $message = new Message($BASE_URL);
 
+$userDao = new UserDAO($conn, $BASE_URL);
+
 $type = filter_input(INPUT_POST, "type");
 
 
@@ -23,7 +25,33 @@ if ($type === "register") {
     //verificaçao de dados minimos
 
     if($name && $lastname && $email && $password) {
+        //verifica se as senhas batem
 
+        if($password === $confirmpassword) {
+            //verifica se o email esta cadastrado no sistema    
+            if($userDao->findByEmail($email) === false) {
+                $user =  new User();
+
+                //criando token e senha
+
+                $userToken = $user->generateToken();
+                $finalPassword = $user->generatePassword($password);
+
+                $user->name = $name;
+                $user->lastname = $lastname;
+                $user->email = $email;
+                $user->password = $finalPassword;
+                $user->token = $userToken;
+
+                $auth = true;
+
+                $userDao->create($user, $auth);
+            } else {
+                $message->setMessage("Usuario já cadastrado", "error", "back");
+            }
+        } else {
+            $message->setMessage("Por favor confira as senhas", "error", "back");
+        }
     } else {
         $message->setMessage("Por favor preencha todos os campos", "error", "back");
     }
