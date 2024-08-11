@@ -54,21 +54,54 @@ class UserDAO implements UserDAOInterface
             $this->setTokenToSession($user->token);
         }
     }
-    public function update(User $user) {}
+    public function update(User $user, $redirect = true)
+    {
+
+        $stmt = $this->conn->prepare("UPDATE users SET
+            name = :name,
+            lastname = :lastname,
+            email = :email,
+            image = :image,
+            bio = :bio,
+            token = :token WHERE id = :id
+        ");
+
+        $stmt->bindParam(":name", $user->name);
+        $stmt->bindParam(":lastname", $user->lastname);
+        $stmt->bindParam(":email", $user->email);
+        $stmt->bindParam(":image", $user->image);
+        $stmt->bindParam(":bio", $user->bio);
+        $stmt->bindParam(":token", $user->token);
+        $stmt->bindParam(":id", $user->id);
+
+        $stmt->execute();
+
+        if ($redirect) {
+            $this->message->setMessage("Dados atualizados!", "success", "editprofile.php");
+        }
+    }
+
     public function verifyToken($protected = false)
     {
+
         if (!empty($_SESSION["token"])) {
+
+            // Pega o token da session
             $token = $_SESSION["token"];
 
             $user = $this->findByToken($token);
 
-            if($user) {
+            if ($user) {
                 return $user;
-            } else {
-                $this->message->setMessage("Faça a autenticação para acessar essa página", "error", "index.php");
+            } else if ($protected) {
+
+                // Redireciona usuário não autenticado
+                $this->message->setMessage("Faça a autenticação para acessar esta página!", "error", "index.php");
             }
-        } else {
-            return false;
+        } else if ($protected) {
+
+            // Redireciona usuário não autenticado
+            $this->message->setMessage("Faça a autenticação para acessar esta página!", "error", "index.php");
         }
     }
     public function setTokenToSession($token, $redirect = true)
@@ -81,7 +114,7 @@ class UserDAO implements UserDAOInterface
             $this->message->setMessage("Seja bem vindo", "success", "editprofile.php");
         }
     }
-    public function authenticateUser($email, $password) {}
+
     public function findByToken($token)
     {
 
@@ -105,12 +138,36 @@ class UserDAO implements UserDAOInterface
         }
     }
 
-    public function destroyToken() {
+    public function destroyToken()
+    {
         $_SESSION["token"] = "";
 
         $this->message->setMessage("Você fez o logout com sucesso!", "success", "index.php");
+    }
 
+    public function authenticateUser($email, $password)
+    {
+        $user = $this->findByEmail($email);
 
+        if ($user) {
+
+            if (password_verify($password, $user->password)) {
+
+                $token = $user->generateToken();
+
+                $this->setTokenToSession($token, false);
+
+                $user->token = $token;
+
+                $this->update($user, false);
+
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     public function findByEmail($email)

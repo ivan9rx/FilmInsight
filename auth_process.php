@@ -24,12 +24,12 @@ if ($type === "register") {
 
     //verificaçao de dados minimos
 
-    if($name && $lastname && $email && $password) {
+    if ($name && $lastname && $email && $password) {
         //verifica se as senhas batem
 
-        if($password === $confirmpassword) {
+        if ($password === $confirmpassword) {
             //verifica se o email esta cadastrado no sistema    
-            if($userDao->findByEmail($email) === false) {
+            if ($userDao->findByEmail($email) === false) {
                 $user =  new User();
 
                 //criando token e senha
@@ -55,9 +55,18 @@ if ($type === "register") {
     } else {
         $message->setMessage("Por favor preencha todos os campos", "error", "back");
     }
+} else if ($type === "login") {
+    $email = filter_input(INPUT_POST, "email");
+    $password = filter_input(INPUT_POST, "password");
 
-} else if($type === "login") {
-     
+    if($userDao->authenticateUser($email, $password)) {
+        $message->setMessage("Seja bem vindo!", "success", "editprofile.php");
+
+    } else {
+
+        $message->setMessage("Usuário ou senha incorretos", "error", "back");
+
+    }
+} else {
+    $message->setMessage("informações inválidas", "error", "index.php");
 }
-
-?>
