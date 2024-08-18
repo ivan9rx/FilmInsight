@@ -52,9 +52,9 @@ if ($type === "create") {
                 $ext = pathinfo($imageName, PATHINFO_EXTENSION);
 
                 if ($ext == 'jpg' || $ext == 'jpeg') {
-                    imagejpeg($imageFile, "./img/movies/". $imageName, 100);
+                    imagejpeg($imageFile, "./img/movies/" . $imageName, 100);
                 } else if ($ext == 'png') {
-                    imagepng($imageFile, "./img/movies/". $imageName);
+                    imagepng($imageFile, "./img/movies/" . $imageName);
                 } else {
                     $message->setMessage("Tipo de imagem não suportado!", "error", "back");
                 }
@@ -68,6 +68,22 @@ if ($type === "create") {
         $movieDao->create($movie);
     } else {
         $message->setMessage("Você precisa adicionar um título, uma descrição e uma categoria!", "error", "index.php");
+    }
+} else if ($type === "delete") {
+
+    $id = filter_input(INPUT_POST, "id");
+
+    $movie =  $movieDao->findById($id);
+
+    if ($movie) {
+        if($movie->users_id === $userData->id) {
+            $movieDao->destroy($movie->id);
+
+        } else {
+            $message->setMessage("Informações inválidas", "error", "index.php");
+        }
+    } else {
+        $message->setMessage("Informações inválidas", "error", "index.php");
     }
 } else {
     $message->setMessage("Informações inválidas", "error", "index.php");
